@@ -25,35 +25,57 @@ PLUS    : '+';
 MINUS   : '-';
 TIMES   : '*';
 
-// Define all the elements of the language for the various keywords that you need
-RANDOM  : 'random';
-POINT   : 'point';
+ARROW   : '->';
 
+ON      : 'on';
+EVENT   : 'event';
+
+ASCEND  : 'ascend';
+BY      : 'by';
+MOVE    : 'move';
+TO      : 'to';
+POINT   : 'point';
+TURN    : 'turn';
+RIGHT   : 'right';
+LEFT    : 'left';
+AT      : 'at';
+SPEED   : 'speed';
+RETURN  : 'return';
+BASE    : 'base';
+DESCEND : 'descend';
+GROUND  : 'ground';
+RANDOM  : 'random';
+OBSTACLE: 'obstacle';
+BATTERY : 'low battery';
+MESSAGE : 'message';
+FOR     : 'for';
 
 // Keywords
 ID: [a-zA-Z_]+; // Allow underscore in ID
 NUMBER: [0-9]+('.'[0-9]+)?;
 
+// Entry point
+program : execution (execution)* EOF;
+execution : (exec=ARROW)? define=ID LCURL (statement)* RCURL (ARROW declare=ID)?;
 
-program : (execution)+;
-execution : '->'? ID LCURL (statement)* RCURL ('->' ID)? ;
-statement : action | reaction | execution ;
-reaction : 'on' event '->' ID ;
-event : 'obstacle' | 'low battery' | 'message' LSQUARE ID RSQUARE ; 
-action : (acDock | acMove | acTurn | acAscend | acDescend)
-( 'for' expression 's' | 'at speed' expression )? ;
-
-acDock : 'return to base' ;
-acMove : 'move' ('to' 'point' point | 'by' expression) ;        // n can be a expression which covers everything
-acTurn : 'turn' ('right' | 'left')? 'by' expression ;
-acAscend : 'ascend by' expression ;
-acDescend: 'descend by' expression | 'descend to ground' ;
+// Statements
+statement   : action | reaction | execution;
+reaction    : ON event ARROW func=ID;
+event       : OBSTACLE | BATTERY | MESSAGE LSQUARE msg=ID RSQUARE ;
+action      : (acAscend | acMove | acTurn | acDock | acDescend) (FOR expression 's' | AT SPEED expression)?;
+acAscend    : ASCEND BY expression; // Must be a number or a random
+acMove      : MOVE (TO | BY) expression; // This must be a point for to and number for by
+acTurn      : TURN (RIGHT | LEFT)? BY expression; // This must be a number
+acDock      : RETURN TO BASE;
+acDescend   : DESCEND BY expression | DESCEND TO GROUND;
 
 expression : NEG expression |
              expression TIMES expression |
              expression (PLUS | MINUS) expression |
-             RANDOM range? |
-             POINT point |
+             RANDOM rrange=expression? |
+             POINT ppoint=expression |
+             point |
+             range |
              NUMBER |
              LPAREN expression RPAREN;
 

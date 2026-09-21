@@ -24,7 +24,7 @@
 
   ScanArea {
     move to point (100, 100) at speed 10
-    on low battery -> EmergencyLanding
+    on obstacle -> TakeOffLand
   } -> EndMission
 
   EndMission { return to base }
