@@ -16,34 +16,46 @@ RSQUARE : ']';
 LPAREN  : '(';
 RPAREN  : ')';
 
+NEG     : '--';
 SEMI    : ';';
 COMMA   : ',';
+GREATER : '>';
 
-NEG     : '--';
 PLUS    : '+';
 MINUS   : '-';
 TIMES   : '*';
+
+// Define all the elements of the language for the various keywords that you need
 RANDOM  : 'random';
 POINT   : 'point';
 
+
 // Keywords
-NUMBER: '-'?[0-9]+('.'[0-9]+)?;
+ID: [a-zA-Z_]+; // Allow underscore in ID
+NUMBER: [0-9]+('.'[0-9]+)?;
 
-// Entry point
-program : (expression)* EOF;
 
-expression 
-    : expression (PLUS | MINUS | TIMES) expression 
-    |        NEG 
-    |        RANDOM range? 
-    |        POINT point 
-    |        NUMBER 
-    |        LPAREN expression RPAREN
-    ;       
+program : (execution)+;
+execution : '->'? ID LCURL (statement)* RCURL ('->' ID)? ;
+statement : action | reaction | execution ;
+reaction : 'on' event '->' ID ;
+event : 'obstacle' | 'low battery' | 'message' LSQUARE ID RSQUARE ; 
+action : (acDock | acMove | acTurn | acAscend | acDescend)
+( 'for' expression 's' | 'at speed' expression )? ;
 
-point 
-    : LPAREN expression COMMA RPAREN
-    ;
-range 
-    : LSQUARE min=expression COMMA max=expression RSQUARE
-    ;
+acDock : 'return to base' ;
+acMove : 'move' ('to' 'point' point | 'by' expression) ;        // n can be a expression which covers everything
+acTurn : 'turn' ('right' | 'left')? 'by' expression ;
+acAscend : 'ascend by' expression ;
+acDescend: 'descend by' expression | 'descend to ground' ;
+
+expression : NEG expression |
+             expression TIMES expression |
+             expression (PLUS | MINUS) expression |
+             RANDOM range? |
+             POINT point |
+             NUMBER |
+             LPAREN expression RPAREN;
+
+point : LPAREN expression COMMA expression RPAREN;
+range : LSQUARE expression COMMA expression RSQUARE;

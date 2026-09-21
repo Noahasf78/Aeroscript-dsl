@@ -37,6 +37,7 @@ generateGrammarSource {
 dependencies {
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
+    implementation("org.jline:jline:3.26.2")
     implementation group: 'org.antlr', name: 'antlr4-runtime', version: '4.13.1'
     implementation group: 'org.antlr', name: 'antlr4-maven-plugin', version: '4.13.1'
     antlr group: 'org.antlr', name: 'antlr4', version: '4.13.1'

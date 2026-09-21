@@ -1,6 +1,7 @@
 package no.uio.aeroscript.ast.expr;
-import java.util.Random;
+
 import no.uio.aeroscript.type.Point;
+import java.util.Random;
 
 public class OperationNode extends Node {
     private final String operation;
@@ -15,34 +16,46 @@ public class OperationNode extends Node {
 
     @Override
     public Object evaluate() {
-        switch (operation) {
-            case "PLUS": 
-                return (Float) left.evaluate() + (Float) right.evaluate();
-            
-            case "MINUS": 
-                return (Float) left.evaluate() - (Float) right.evaluate();
-            
-            case "TIMES": 
-                return (Float) left.evaluate() * (Float) right.evaluate();
-            
-            case "NEG":    
-                return -1*(Float) left.evaluate(); 
-            
-            case "RANDOM": 
-                float min = (Float) left.evaluate();
-                float max = (Float) right.evaluate();
-                Random random = new Random();       
-                return (float) (min + (max - min) * random.nextFloat());
-            
-            case "POINT": 
-                    float x = (Float) left.evaluate();
-                    float y = (Float) right.evaluate();
-                    return new Point(x, y);
-                
-                default:
-                    throw new UnsupportedOperationException("Operation not supported: " + operation);
-                
-        }
-
+        return switch (operation) {
+            case "PLUS" -> {
+                if (left.evaluate() instanceof Point point && right.evaluate() instanceof Point otherPoint) {
+                    yield new Point((Float) point.getX() + (Float) otherPoint.getX(), (Float) point.getY() + (Float) otherPoint.getY());
+                } else if (left.evaluate() instanceof Float && right.evaluate() instanceof Float) {
+                    yield (Float) left.evaluate() + (Float) right.evaluate();
+                } else {
+                    throw new IllegalArgumentException("Invalid operation: " + operation);
+                }
+            }
+            case "MINUS" -> {
+                if (left.evaluate() instanceof Point point && right.evaluate() instanceof Point otherPoint) {
+                    yield new Point((Float) point.getX() - (Float) otherPoint.getX(), (Float) point.getY() - (Float) otherPoint.getY());
+                } else if (left.evaluate() instanceof Float && right.evaluate() instanceof Float) {
+                    yield (Float) left.evaluate() - (Float) right.evaluate();
+                } else {
+                    throw new IllegalArgumentException("Invalid operation: " + operation);
+                }
+            }
+            case "TIMES" -> {
+                if (left.evaluate() instanceof Point point && right.evaluate() instanceof Float) {
+                    yield new Point((Float) point.getX() * (Float) right.evaluate(), (Float) point.getY() * (Float) right.evaluate());
+                } else if (left.evaluate() instanceof Float && right.evaluate() instanceof Point point) {
+                    yield new Point((Float) left.evaluate() * (Float) point.getX(), (Float) left.evaluate() * (Float) point.getY());
+                } else if (left.evaluate() instanceof Float && right.evaluate() instanceof Float) {
+                    yield (Float) left.evaluate() * (Float) right.evaluate();
+                } else {
+                    throw new IllegalArgumentException("Invalid operation: " + operation);
+                }
+            }
+            case "NEG" -> (Float) left.evaluate() * (-1);
+            // For RANDOM return a random number between left and right
+            case "RANDOM" -> {
+                Random r = new Random();
+                float leftValue = (Float) left.evaluate();
+                float rightValue = (Float) right.evaluate();
+                yield r.nextFloat((rightValue-leftValue)) + leftValue;
+            }
+            case "POINT" -> new Point((Float) left.evaluate(), (Float) right.evaluate());
+            default -> throw new IllegalArgumentException("Invalid operation: " + operation);
+        };
     }
 }
