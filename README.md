@@ -1,5 +1,7 @@
 # AeroScript
 
+<p align="center"><img src="docs/radar_hud.svg" width="100%" alt="AeroScript Telemetry HUD"></p>
+
 ![Java 17](https://img.shields.io/badge/Java-17-e76f00?logo=openjdk&logoColor=white)
 ![ANTLR4](https://img.shields.io/badge/ANTLR-4.13.1-8f44ad)
 ![Gradle](https://img.shields.io/badge/Gradle-build-02303a?logo=gradle&logoColor=white)
@@ -41,21 +43,33 @@ The interactive control surface supports live, step-by-step piloting: issue a co
 
 ## Compilation and runtime pipeline
 
-```text
-.aero mission
-	 |
-	 v
-ANTLR4 lexer and parser  ->  parse tree
-	 |
-	 v
-Custom visitor            ->  domain and expression AST
-	 |
-	 v
-Static TypeChecker        ->  validated mission
-	 |
-	 v
-Virtual Flight Engine     ->  heap, coordinates, battery, call stack
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#1e293b', 'primaryTextColor': '#f8fafc', 'primaryBorderColor': '#38bdf8', 'lineColor': '#38bdf8', 'secondaryColor': '#0f172a', 'tertiaryColor': '#0f172a'}}}%%
+flowchart TD
+    subgraph Frontend["Mission compilation · current entry point"]
+        A[".aero flight script"] --> B["ANTLR4 lexer & parser"]
+        B --> C["Parse tree"]
+        C --> D{"TypeChecker"}
+        D -->|Type error| F["Pre-flight error"]
+        D -->|Valid| V["Static checks complete"]
+    end
+    subgraph Runtime["Virtual flight · conceptual runtime"]
+        V -.-> E["Interpreter engine"]
+        E --> G["Virtual drone state"]
+        G --> H["Position · x, y, z"]
+        G --> J["Battery & energy consumption"]
+        J -->|Below 20%| K["Low-battery reaction"]
+        K --> M["Mission-defined return to base"]
+    end
+    classDef error fill:#29151f,stroke:#fb7185,color:#fecdd3;
+    classDef alert fill:#292211,stroke:#fbbf24,color:#fef3c7;
+    classDef safe fill:#102b28,stroke:#34d399,color:#d1fae5;
+    class F error;
+    class K alert;
+    class V,M safe;
 ```
+
+The solid compilation path reflects the current application entry point; the dashed connection shows the conceptual flight runtime.
 
 1. **Frontend:** ANTLR4 tokenizes the source and parses it into a Parse Tree from the `.aero` grammar.
 2. **AST generation:** A custom visitor transforms parse-tree nodes into domain and expression AST nodes representing mission intent.
@@ -95,6 +109,24 @@ The following mission takes off, scans two waypoints, reacts to an obstacle, and
 		descend to ground
 	}
 }
+```
+
+### Live Flight Execution & Telemetry Log
+
+Illustrative output for a separate `patrol_alpha.aero` mission; this is a runtime interface concept, not output emitted by the current CLI.
+
+```text
+┌── [AEROSCRIPT TELEMETRY ENGINE v1.0] ──────────────────────────────────────────────┐
+│ STATUS: ACTIVE MISSION       ALTITUDE: 50.0m       BATTERY: [██████░░░░] 58%       │
+│ TARGET: POINT (10.0, 20.0)    HEADING: 090° EAST    MODE: AUTONOMOUS ROUTE         │
+└────────────────────────────────────────────────────────────────────────────────────┘
+
+[00:01.02] [PARSER]       Loaded mission: patrol_alpha.aero
+[00:01.05] [TYPECHECK]    Static safety check: PASSED (0 TypeErrors)
+[00:01.12] [TAKEOFF]      Ascending by 50.0m ... Altitude lock reached.
+[00:02.40] [NAVIGATION]   Moving to point (10.0, 20.0) | Energy drain: -4.2%
+[00:04.18] [SAFETY]       Battery threshold scan: OK (Above 20% limit)
+[00:06.00] [ACTION]       Maneuver complete. Loitering at destination...
 ```
 
 The `->` transitions connect named execution blocks, while reactions remain attached to the flight behavior that needs to handle them. This keeps the mission readable as both a program and a safety plan.

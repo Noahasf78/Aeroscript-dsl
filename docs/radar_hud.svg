@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="260" viewBox="0 0 800 260" role="img" aria-labelledby="title desc">
+  <title id="title">AeroScript Telemetry HUD</title>
+  <desc id="desc">Illustrative mission telemetry with an animated radar sweep, waypoint markers, altitude of 50 metres, target at 10, 20, and an armed low-battery failsafe.</desc>
+  <defs>
+    <linearGradient id="panel" x2="1" y2="1">
+      <stop stop-color="#0d1117"/><stop offset="1" stop-color="#030712"/>
+    </linearGradient>
+    <radialGradient id="radar">
+      <stop stop-color="#0b343a" stop-opacity=".6"/><stop offset="1" stop-color="#030712"/>
+    </radialGradient>
+    <linearGradient id="trail" x1="0" y1="1" x2="1" y2="0">
+      <stop stop-color="#34d399" stop-opacity="0"/><stop offset="1" stop-color="#22d3ee" stop-opacity=".28"/>
+    </linearGradient>
+    <filter id="glow" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur stdDeviation="2.5"/><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <style>
+    text { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; }
+    .label { fill: #8b9caf; font-size: 10px; letter-spacing: 1.4px; }
+    .value { fill: #e6edf3; font-size: 15px; }
+    .sweep { transform-origin: 138px 130px; animation: scan 6s linear infinite; }
+    .beacon { animation: pulse 3s ease-in-out infinite; }
+    .warning { animation: pulse 2s ease-in-out infinite; }
+    @keyframes scan { to { transform: rotate(360deg); } }
+    @keyframes pulse { 0%, 100% { opacity: .4; } 50% { opacity: 1; } }
+    @media (prefers-reduced-motion: reduce) { .sweep, .beacon, .warning { animation: none; } }
+  </style>
+  <rect x=".5" y=".5" width="799" height="259" rx="16" fill="url(#panel)" stroke="#253244"/>
+  <path d="M18 39V18h21M761 18h21v21M18 221v21h21M761 242h21v-21" fill="none" stroke="#22d3ee" stroke-opacity=".5"/>
+
+  <!-- Radar scope: 25 m, 50 m and 75 m distance rings. -->
+  <circle cx="138" cy="130" r="98" fill="url(#radar)" stroke="#284454"/>
+  <g fill="none" stroke="#244453" stroke-width=".8">
+    <circle cx="138" cy="130" r="32"/><circle cx="138" cy="130" r="64"/>
+    <path d="M40 130h196M138 32v196M69 61l138 138M69 199 207 61" stroke-dasharray="3 5"/>
+    <circle cx="138" cy="130" r="104" stroke-dasharray="1 12"/>
+  </g>
+  <g class="sweep">
+    <path d="M138 130 187 45A98 98 0 0 1 236 130Z" fill="url(#trail)"/>
+    <path d="M138 130h98" stroke="#5eead4" stroke-width="1.5" filter="url(#glow)"/>
+  </g>
+  <path d="m100 166 65-66 32 48" fill="none" stroke="#34d399" stroke-opacity=".55" stroke-dasharray="4 5"/>
+  <g fill="#34d399" filter="url(#glow)">
+    <circle cx="100" cy="166" r="3"/><circle cx="197" cy="148" r="3"/>
+  </g>
+  <circle class="beacon" cx="165" cy="100" r="10" fill="none" stroke="#22d3ee"/>
+  <circle cx="165" cy="100" r="4" fill="#67e8f9" filter="url(#glow)"/>
+  <path d="m138 124 5 10-5-2-5 2Z" fill="#e6edf3"/>
+  <g fill="#7995a5" font-size="8">
+    <text x="134" y="24">N</text><text x="243" y="133">E</text>
+    <text x="145" y="159">25m</text><text x="145" y="191">50m</text><text x="145" y="220">75m</text>
+  </g>
+  <path d="M271 32v196" stroke="#243142"/>
+
+  <!-- Mission telemetry. All values are an illustrative interface preview. -->
+  <text x="298" y="40" class="label">AEROSCRIPT / FLIGHT TELEMETRY</text>
+  <circle cx="305" cy="63" r="3" fill="#34d399" filter="url(#glow)"/>
+  <text x="317" y="67" fill="#5eead4" font-size="12" letter-spacing="1">RADAR LOCK: ACTIVE</text>
+  <text x="758" y="40" text-anchor="end" class="label">SIM / 01</text>
+  <path d="M298 83h460" stroke="#243142"/>
+
+  <text x="298" y="106" class="label">FLIGHT LEVEL</text>
+  <text x="298" y="130" class="value">ALTITUDE: 50m</text>
+  <text x="550" y="106" class="label">WAYPOINT COORDINATES</text>
+  <text x="550" y="130" class="value">TARGET: (10, 20)</text>
+  <text x="298" y="159" class="label">SAFETY PROTOCOL</text>
+  <text x="298" y="181" fill="#6ee7b7" font-size="15">FAILSAFE: ARMED</text>
+  <text x="550" y="159" class="label">ENERGY RESERVE / 58%</text>
+  <rect x="550" y="171" width="208" height="8" rx="4" fill="#1e293b"/>
+  <rect x="550" y="171" width="121" height="8" rx="4" fill="#34d399"/>
+  <path d="M592 167v16" stroke="#fb7185"/>
+
+  <rect x="298" y="202" width="460" height="29" rx="5" fill="#111923" stroke="#253244"/>
+  <circle class="warning" cx="313" cy="216" r="3" fill="#fb7185" filter="url(#glow)"/>
+  <text x="325" y="220" fill="#fda4af" font-size="10">LOW BATTERY &lt; 20% → RETURN TO BASE</text>
+  <text x="745" y="220" text-anchor="end" fill="#8b9caf" font-size="9">STANDBY</text>
+  <text x="298" y="247" fill="#687c91" font-size="8" letter-spacing="1.1">AUTONOMOUS NAVIGATION / ILLUSTRATIVE TELEMETRY</text>
+</svg>
