@@ -2,6 +2,10 @@
 
 AeroScript is an academic domain-specific language for drone missions, written in Java with ANTLR4 and Gradle. The project explores parsing, expression ASTs, static checking, and a documented interpreter design with stateful actions and event-driven safety reactions.
 
+<p align="center">
+  <img src="docs/recon_flightpath.svg" width="100%" alt="AeroScript 2D Flight Trajectory Plot">
+</p>
+
 ## Architecture and implementation status
 
 ```text
@@ -45,8 +49,6 @@ In that design, `Execution` manages normal statements and an emergency stack. `R
 ## Triangular Recon Patrol
 
 [examples/recon_patrol.aero](examples/recon_patrol.aero) ascends to 30 m, visits Alpha `(30, 40)` and Bravo `(60, 0)`, then returns to Base and lands. The mission passes static checking and completes with **220.00 m** simulated distance and **78.00%** battery remaining.
-
-![Triangular Recon Patrol flight path with waypoint distance and battery telemetry](docs/recon_flightpath.svg)
 
 The XY perimeter is 160 m. The simulator also counts 30 m of ascent and 30 m of descent. Node statistics show cumulative distance and remaining battery; Base includes both takeoff and docking states.
 
