@@ -1,0 +1,6 @@
+// Deterministic simulated mission: take off, visit a waypoint, and dock.
+-> DemoFlight {
+    ascend by 20
+    move to point (10, 20)
+    return to base
+}

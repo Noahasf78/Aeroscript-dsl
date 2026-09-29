@@ -1,54 +1,51 @@
 package no.uio.aeroscript;
 
+import java.io.IOException;
+import java.io.PrintStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import no.uio.aeroscript.antlr.AeroScriptLexer;
 import no.uio.aeroscript.antlr.AeroScriptParser;
-import no.uio.aeroscript.ast.stmt.Statement;
-import no.uio.aeroscript.runtime.TypeChecker;
-import no.uio.aeroscript.type.Point;
 import no.uio.aeroscript.error.ThrowingErrorListener;
 import no.uio.aeroscript.error.TypeError;
+import no.uio.aeroscript.runtime.FlightRuntime;
+import no.uio.aeroscript.runtime.TypeChecker;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Stack;
-
 public class Main {
     public static void main(String[] args) {
-        System.setProperty("org.jline.terminal.dumb", "true");
-        Stack<Statement> stack = new Stack<>();
-        float batteryLevel;
-        Point initialPosition;
+        int status = run(args, System.out, System.err);
+        if (status != 0) System.exit(status);
+    }
 
-        String path = args[0];
-
-        String content;
+    public static int run(String[] args, PrintStream out, PrintStream err) {
+        if (args.length != 1) {
+            err.println("Usage: java -jar aeroscript-1.0-all.jar <mission.aero>");
+            return 1;
+        }
         try {
-            content = new String(Files.readAllBytes(Paths.get(path)));
-
-            AeroScriptLexer lexer = new AeroScriptLexer(CharStreams.fromString(content));
+            var lexer = new AeroScriptLexer(CharStreams.fromString(Files.readString(Path.of(args[0]))));
             lexer.removeErrorListeners();
             lexer.addErrorListener(ThrowingErrorListener.INSTANCE);
-            CommonTokenStream tokens = new CommonTokenStream(lexer);
-            AeroScriptParser parser = new AeroScriptParser(tokens);
+            var parser = new AeroScriptParser(new CommonTokenStream(lexer));
             parser.removeErrorListeners();
             parser.addErrorListener(ThrowingErrorListener.INSTANCE);
-            AeroScriptParser.ProgramContext programContext = parser.program();
-
-            TypeChecker typeChecker = new TypeChecker(programContext);
-            typeChecker.check();
-
+            var program = parser.program();
+            new TypeChecker(program).check();
+            out.println("[TYPECHECK] Passed");
+            new FlightRuntime(out).run(program);
+            return 0;
         } catch (IOException e) {
-            System.err.println("Error reading file: " + e.getMessage());
+            err.println("File error: " + e.getMessage());
         } catch (ParseCancellationException e) {
-            System.err.println("Parser error: " + e.getMessage());
+            err.println("Parser error: " + e.getMessage());
         } catch (TypeError e) {
-            System.err.println("TypeError:\n  " + e.getMessage());
+            err.println("TypeError: " + e.getMessage());
         } catch (IllegalArgumentException e) {
-            System.err.println(e.getMessage());
+            err.println("Execution error: " + e.getMessage());
         }
+        return 1;
     }
 }

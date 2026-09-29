@@ -1,0 +1,6 @@
+-> TriangularReconPatrol {
+    ascend by 30
+    move to point (30, 40)
+    move to point (60, 0)
+    return to base
+}
