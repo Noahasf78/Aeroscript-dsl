@@ -18,30 +18,36 @@ public class OperationNode extends Node {
     public Object evaluate() {
         return switch (operation) {
             case "PLUS" -> {
-                if (left.evaluate() instanceof Point point && right.evaluate() instanceof Point otherPoint) {
+                Object leftValue = left.evaluate();
+                Object rightValue = right.evaluate();
+                if (leftValue instanceof Point point && rightValue instanceof Point otherPoint) {
                     yield new Point((Float) point.getX() + (Float) otherPoint.getX(), (Float) point.getY() + (Float) otherPoint.getY());
-                } else if (left.evaluate() instanceof Float && right.evaluate() instanceof Float) {
-                    yield (Float) left.evaluate() + (Float) right.evaluate();
+                } else if (leftValue instanceof Float && rightValue instanceof Float) {
+                    yield (Float) leftValue + (Float) rightValue;
                 } else {
                     throw new IllegalArgumentException("Invalid operation: " + operation);
                 }
             }
             case "MINUS" -> {
-                if (left.evaluate() instanceof Point point && right.evaluate() instanceof Point otherPoint) {
+                Object leftValue = left.evaluate();
+                Object rightValue = right.evaluate();
+                if (leftValue instanceof Point point && rightValue instanceof Point otherPoint) {
                     yield new Point((Float) point.getX() - (Float) otherPoint.getX(), (Float) point.getY() - (Float) otherPoint.getY());
-                } else if (left.evaluate() instanceof Float && right.evaluate() instanceof Float) {
-                    yield (Float) left.evaluate() - (Float) right.evaluate();
+                } else if (leftValue instanceof Float && rightValue instanceof Float) {
+                    yield (Float) leftValue - (Float) rightValue;
                 } else {
                     throw new IllegalArgumentException("Invalid operation: " + operation);
                 }
             }
             case "TIMES" -> {
-                if (left.evaluate() instanceof Point point && right.evaluate() instanceof Float) {
-                    yield new Point((Float) point.getX() * (Float) right.evaluate(), (Float) point.getY() * (Float) right.evaluate());
-                } else if (left.evaluate() instanceof Float && right.evaluate() instanceof Point point) {
-                    yield new Point((Float) left.evaluate() * (Float) point.getX(), (Float) left.evaluate() * (Float) point.getY());
-                } else if (left.evaluate() instanceof Float && right.evaluate() instanceof Float) {
-                    yield (Float) left.evaluate() * (Float) right.evaluate();
+                Object leftValue = left.evaluate();
+                Object rightValue = right.evaluate();
+                if (leftValue instanceof Point point && rightValue instanceof Float) {
+                    yield new Point((Float) point.getX() * (Float) rightValue, (Float) point.getY() * (Float) rightValue);
+                } else if (leftValue instanceof Float && rightValue instanceof Point point) {
+                    yield new Point((Float) leftValue * (Float) point.getX(), (Float) leftValue * (Float) point.getY());
+                } else if (leftValue instanceof Float && rightValue instanceof Float) {
+                    yield (Float) leftValue * (Float) rightValue;
                 } else {
                     throw new IllegalArgumentException("Invalid operation: " + operation);
                 }
