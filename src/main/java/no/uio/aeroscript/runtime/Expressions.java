@@ -5,6 +5,7 @@ import no.uio.aeroscript.ast.expr.Node;
 import no.uio.aeroscript.ast.expr.NumberNode;
 import no.uio.aeroscript.ast.expr.OperationNode;
 import no.uio.aeroscript.error.TypeError;
+import java.util.random.RandomGenerator;
 
 /** Builds and type-checks expression ASTs without evaluating random values. */
 final class Expressions {
@@ -35,9 +36,7 @@ final class Expressions {
                 public Object evaluate() {
                     var bounds = (no.uio.aeroscript.type.Point) range.node().evaluate();
                     float low = bounds.getX(), high = bounds.getY();
-                    if (!Float.isFinite(low) || !Float.isFinite(high) || low >= high)
-                        throw new IllegalArgumentException("Random range must have finite, increasing bounds.");
-                    return (float) java.util.concurrent.ThreadLocalRandom.current().nextDouble(low, high);
+                    return randomInRange(low, high, java.util.concurrent.ThreadLocalRandom.current());
                 }
             });
         }
@@ -66,6 +65,14 @@ final class Expressions {
             result = left.type();
         }
         return new Expression(result, new OperationNode(op, left.node(), right.node()));
+    }
+
+    static float randomInRange(float low, float high, RandomGenerator random) {
+        if (!Float.isFinite(low) || !Float.isFinite(high) || low >= high)
+            throw new IllegalArgumentException("Random range must have finite, increasing bounds.");
+        float value = (float) random.nextDouble(low, high);
+        // Narrowing to float can round a valid double sample up to the excluded bound.
+        return value >= high ? Math.nextDown(high) : value;
     }
 
     static void require(Expression expression, Type expected, String message) {
