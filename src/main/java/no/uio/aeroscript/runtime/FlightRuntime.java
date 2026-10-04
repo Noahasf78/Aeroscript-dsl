@@ -9,9 +9,10 @@ import no.uio.aeroscript.type.Point;
 public final class FlightRuntime {
     // Illustrative energy model: percentage points per metre of travel.
     private static final double ENERGY_PER_METRE = 0.1;
+    private static final double INITIAL_BATTERY = 100;
     private final PrintStream out;
     private double x, y, altitude, heading, distance;
-    private double battery = 100;
+    private double battery = INITIAL_BATTERY;
     private int actions;
 
     public FlightRuntime(PrintStream out) { this.out = out; }
@@ -68,11 +69,13 @@ public final class FlightRuntime {
             throw new IllegalArgumentException("Flight coordinates must be finite.");
         // Dock travels horizontally to base, then descends to ground.
         double travel = Math.hypot(nextX - x, nextY - y) + Math.abs(nextAltitude - altitude);
-        double remaining = battery - travel * ENERGY_PER_METRE;
+        double nextDistance = distance + travel;
+        // Derive energy use from total travel to avoid repeated battery-subtraction rounding.
+        double remaining = INITIAL_BATTERY - nextDistance * ENERGY_PER_METRE;
         if (remaining < 20)
             throw new IllegalArgumentException("Battery failsafe: action would leave less than 20%; simulation stopped.");
         x = nextX; y = nextY; altitude = nextAltitude;
-        distance += travel; battery = remaining; actions++;
+        distance = nextDistance; battery = remaining; actions++;
         log("[%s] position=(%.1f, %.1f) | altitude=%.1f m | battery=%.2f%%%n", name, x, y, altitude, battery);
     }
 
